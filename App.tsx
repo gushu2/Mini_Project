@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 const App: React.FC = () => {
-  // "connect" now triggers the virtual mode designed for charge-only cables
+  // Uses real Web Serial API connection
   const { status, data, connect, disconnect } = useBiometrics();
   const [current, setCurrent] = useState<BiometricDataPoint | null>(null);
 
@@ -44,11 +44,20 @@ const App: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center gap-4 bg-surface p-2 rounded-xl border border-slate-700">
           <div className="px-3 flex flex-col items-end min-w-[120px]">
              <span className={`text-xs font-bold uppercase ${
-               isConnected ? 'text-green-400' : 'text-slate-400'
+               status === ConnectionStatus.CONNECTED ? 'text-green-400' : 
+               status === ConnectionStatus.ERROR ? 'text-red-400' : 
+               'text-slate-400'
              }`}>
-               {isConnected ? 'System Active' : isConnecting ? 'Calibrating...' : 'Standby'}
+               {status === ConnectionStatus.CONNECTED ? 'Device Connected' : 
+                status === ConnectionStatus.ERROR ? 'Connection Error' :
+                isConnecting ? 'Connecting...' : 'Disconnected'}
              </span>
-             {isConnected && <span className="text-[10px] text-slate-500 flex items-center gap-1"><Signal className="w-3 h-3" /> Signal Stable</span>}
+             {isConnected && (
+               <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                 <Signal className="w-3 h-3" /> 
+                 {data.length > 0 ? 'Receiving Data' : 'Waiting for Data...'}
+               </span>
+             )}
           </div>
           
           {isConnected ? (
@@ -57,7 +66,7 @@ const App: React.FC = () => {
               className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-6 py-2.5 rounded-lg transition-all font-medium border border-red-500/10"
             >
               <Unplug className="w-4 h-4" />
-              Stop Monitor
+              Disconnect
             </button>
           ) : (
             <button 
@@ -77,7 +86,7 @@ const App: React.FC = () => {
               ) : (
                 <>
                   <Power className="w-4 h-4" />
-                  Start Monitoring
+                  Connect Device
                 </>
               )}
             </button>
@@ -105,7 +114,7 @@ const App: React.FC = () => {
                  <div className="flex flex-col items-center text-slate-600">
                    <Power className="w-16 h-16 mb-4 opacity-20" />
                    <p className="text-sm uppercase tracking-widest font-medium">System Offline</p>
-                   <p className="text-xs mt-2 opacity-50">Power on device to begin</p>
+                   <p className="text-xs mt-2 opacity-50">Connect ESP32 via USB</p>
                  </div>
                )}
              </div>
@@ -185,7 +194,9 @@ const App: React.FC = () => {
                 </ResponsiveContainer>
               ) : (
                  <div className="h-full w-full flex items-center justify-center border-2 border-dashed border-slate-700 rounded-xl">
-                    <p className="text-slate-500 text-sm">Waiting for data stream...</p>
+                    <p className="text-slate-500 text-sm">
+                      {isConnected ? 'Waiting for data from device...' : 'Connect device to view analytics'}
+                    </p>
                  </div>
               )}
             </div>
@@ -227,7 +238,9 @@ const App: React.FC = () => {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full w-full flex items-center justify-center border-2 border-dashed border-slate-700 rounded-xl">
-                    <p className="text-slate-500 text-sm">Waiting for data stream...</p>
+                    <p className="text-slate-500 text-sm">
+                      {isConnected ? 'Waiting for data from device...' : 'Connect device to view analytics'}
+                    </p>
                  </div>
               )}
             </div>
