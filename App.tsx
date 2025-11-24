@@ -8,12 +8,12 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area 
 } from 'recharts';
 import { 
-  Activity, Unplug, Power, Heart, Droplets, Signal, CheckCircle2
+  Activity, Unplug, Power, Heart, Droplets, Signal
 } from 'lucide-react';
 
 const App: React.FC = () => {
-  // "connectVirtual" replaces the physical USB connection flow
-  const { status, data, connectVirtual, disconnect } = useBiometrics();
+  // "connect" now triggers the virtual mode designed for charge-only cables
+  const { status, data, connect, disconnect } = useBiometrics();
   const [current, setCurrent] = useState<BiometricDataPoint | null>(null);
 
   useEffect(() => {
@@ -22,8 +22,7 @@ const App: React.FC = () => {
     }
   }, [data]);
 
-  // Treat SIMULATION status as a valid connection for this use case
-  const isConnected = status === ConnectionStatus.CONNECTED || status === ConnectionStatus.SIMULATION;
+  const isConnected = status === ConnectionStatus.CONNECTED;
   const isConnecting = status === ConnectionStatus.CONNECTING;
   const isHighStress = (current?.stressScore || 0) > THRESHOLDS.STRESS_HIGH;
 
@@ -45,7 +44,6 @@ const App: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center gap-4 bg-surface p-2 rounded-xl border border-slate-700">
           <div className="px-3 flex flex-col items-end min-w-[120px]">
              <span className={`text-xs font-bold uppercase ${
-               status === 'ERROR' ? 'text-red-400' : 
                isConnected ? 'text-green-400' : 'text-slate-400'
              }`}>
                {isConnected ? 'System Active' : isConnecting ? 'Calibrating...' : 'Standby'}
@@ -63,7 +61,7 @@ const App: React.FC = () => {
             </button>
           ) : (
             <button 
-              onClick={connectVirtual}
+              onClick={connect}
               disabled={isConnecting}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-lg transition-all font-bold shadow-lg ${
                 isConnecting 
@@ -79,7 +77,7 @@ const App: React.FC = () => {
               ) : (
                 <>
                   <Power className="w-4 h-4" />
-                  Connect Sensor
+                  Start Monitoring
                 </>
               )}
             </button>
@@ -106,8 +104,8 @@ const App: React.FC = () => {
                ) : (
                  <div className="flex flex-col items-center text-slate-600">
                    <Power className="w-16 h-16 mb-4 opacity-20" />
-                   <p className="text-sm uppercase tracking-widest font-medium">Sensor Offline</p>
-                   <p className="text-xs mt-2 opacity-50">Connect device to begin analysis</p>
+                   <p className="text-sm uppercase tracking-widest font-medium">System Offline</p>
+                   <p className="text-xs mt-2 opacity-50">Power on device to begin</p>
                  </div>
                )}
              </div>
@@ -130,7 +128,7 @@ const App: React.FC = () => {
              </div>
           </div>
 
-          {/* AI Coach Panel (Mobile: Stacked, Desktop: Sidebar) */}
+          {/* AI Coach Panel */}
           <div className="h-[500px]">
              <AICoach recentData={data} isHighStress={isHighStress} />
           </div>
