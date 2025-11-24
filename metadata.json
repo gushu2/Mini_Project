@@ -1,0 +1,7 @@
+{
+  "name": "NeuroCalm",
+  "description": "A real-time stress detection and management system interfacing with biometric sensors via USB Serial or Simulation. Features AI-driven relaxation coaching.",
+  "requestFramePermissions": [
+    "serial"
+  ]
+}
